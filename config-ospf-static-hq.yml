@@ -1,0 +1,60 @@
+---
+- name: Configure OSPF and Static Routes on FortiGate
+  hosts: fortigates
+  connection: httpapi
+  gather_facts: no
+  collections:
+    - fortinet.fortios
+
+  vars:
+    ansible_httpapi_use_ssl: no
+    ansible_httpapi_validate_certs: no
+    ansible_httpapi_port: 80
+    vdom: "root"
+    fortigate_token: "6f9bb755jrjhjnywr8mqf9Nj0ghsn7"
+
+  tasks:
+    - name: Configure OSPF
+      fortios_router_ospf:
+        vdom: "{{ vdom }}"
+        state: "present"
+        router_ospf:
+          router_id: "10.195.199.129"
+          area:
+            - id: "0.0.0.0"
+          ospf_interface:
+            - interface: "vpn_branche"
+              network_type: "point-to-point"
+              name: "vpn"
+          network:
+            - prefix: "10.63.252.0 255.255.255.0"
+          redistribute:
+            - type: "connected"
+              status: "enable"
+            - type: "static"
+              status: "enable"
+            - type: "rip"
+              status: "disable"
+            - type: "bgp"
+              status: "disable"
+            - type: "isis"
+              status: "disable"
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure Static Routes
+      fortios_router_static:
+        vdom: "{{ vdom }}"
+        state: "present"
+        router_static:
+          - dst: "10.195.7.0 255.255.255.0"
+            gateway: "10.195.199.34"
+            device: "insite"
+          - dst: "10.63.255.0 255.255.255.0"
+            gateway: "10.195.199.131"
+            device: "port4"
+          - dst: "10.63.244.0 255.255.255.0"
+            gateway: "10.195.199.131"
+            device: "port4"
+          - dst: "10.63.252.0 255.255.255.0"
+            device: "vpn_branche"
+        access_token: "{{ fortigate_token }}"

@@ -1,0 +1,45 @@
+---
+- name: Configure FortiGate IPsec VPN
+  hosts: fortigates
+  connection: httpapi
+  gather_facts: no
+  collections:
+    - fortinet.fortios
+
+  vars:
+    ansible_httpapi_use_ssl: no
+    ansible_httpapi_validate_certs: no
+    ansible_httpapi_port: 80
+    vdom: "root"
+    fortigate_token: "6f9bb755jrjhjnywr8mqf9Nj0ghsn7"
+
+  tasks:
+    - name: Configure Phase 1 for vpn_branche
+      fortios_vpn_ipsec_phase1_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        vpn_ipsec_phase1_interface:
+          name: "vpn_branche"
+          type: "dynamic"
+          interface: "port4"
+          ike_version: 2
+          peertype: "any"
+          net_device: "enable"
+          exchange_interface_ip: "enable"
+          proposal: "des-sha1"
+          add_route: "disable"
+          dhgrp: [2, 1]
+          psksecret: "123456"  # Replace with actual secret
+          dpd_retryinterval: 5
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure Phase 2 for vpn_branche
+      fortios_vpn_ipsec_phase2_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        vpn_ipsec_phase2_interface:
+          name: "vpn_branche"
+          phase1name: "vpn_branche"
+          proposal: "des-sha1"
+          dhgrp: [2, 1]
+        access_token: "{{ fortigate_token }}"

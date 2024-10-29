@@ -1,0 +1,74 @@
+---
+- name: Configure FortiGate IPsec VPN
+  hosts: fortigates
+  connection: httpapi
+  gather_facts: no
+  collections:
+    - fortinet.fortios
+
+  vars:
+    ansible_httpapi_use_ssl: no
+    ansible_httpapi_validate_certs: no
+    ansible_httpapi_port: 80
+    vdom: "root"
+    fortigate_token: "6f9bb755jrjhjnywr8mqf9Nj0ghsn7"
+
+  tasks:
+    - name: Configure Phase 1 for vpn_mfn
+      fortios_vpn_ipsec_phase1_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        vpn_ipsec_phase1_interface:
+          name: "vpn_mfn"
+          interface: "port2"
+          ike_version: 2
+          peertype: "any"
+          net_device: "enable"
+          exchange_interface_ip: "enable"
+          proposal: "des-sha1"
+          dpd: "on-idle"
+          dhgrp: [2, 1]
+          remote_gw: "10.195.199.129"
+          psksecret: "123456"  # Replace with actual secret
+          dpd_retryinterval: 5
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure Phase 1 for vpn_branch
+      fortios_vpn_ipsec_phase1_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        vpn_ipsec_phase1_interface:
+          name: "vpn_branch"
+          interface: "port3"
+          ike_version: 2
+          peertype: "any"
+          net_device: "enable"
+          exchange_interface_ip: "enable"
+          proposal: "des-sha1"
+          dhgrp: [2, 1]
+          remote_gw: "10.195.199.129"
+          psksecret: "123456"  # Replace with actual secret
+          dpd_retryinterval: 5
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure Phase 2 for vpn_mfn
+      fortios_vpn_ipsec_phase2_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        vpn_ipsec_phase2_interface:
+          name: "vpn_mfn"
+          phase1name: "vpn_mfn"
+          proposal: "des-sha1"
+          dhgrp: [2, 1]
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure Phase 2 for vpn_branch
+      fortios_vpn_ipsec_phase2_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        vpn_ipsec_phase2_interface:
+          name: "vpn_branch"
+          phase1name: "vpn_branch"
+          proposal: "des-sha1"
+          dhgrp: [2, 1]
+        access_token: "{{ fortigate_token }}"

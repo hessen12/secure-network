@@ -1,0 +1,50 @@
+---
+- name: Configure Firewall Policies on FortiGate
+  hosts: fortigates
+  connection: httpapi
+  gather_facts: no
+  collections:
+    - fortinet.fortios
+
+  vars:
+    ansible_httpapi_use_ssl: no
+    ansible_httpapi_validate_certs: no
+    ansible_httpapi_port: 80
+    vdom: "root"
+    fortigate_token: "6f9bb755jrjhjnywr8mqf9Nj0ghsn7"
+
+  tasks:
+    - name: Create 'outside_inside_vpn' policy
+      fortios_firewall_policy:
+        vdom: "{{ vdom }}"
+        state: "present"
+        firewall_policy:
+          name: "outside_inside_vpn"
+          srcintf: "vpn_branche"
+          dstintf: "insite"
+          action: "accept"
+          srcaddr: "all"
+          dstaddr: "all"
+          schedule: "always"
+          service: "ALL"
+          logtraffic: "all"
+          uuid: "78657584-9196-51ef-9001-045181339fbe"
+      access_token: "{{ fortigate_token }}"
+
+    - name: Create 'inside-to-outside' policy
+      fortios_firewall_policy:
+        vdom: "{{ vdom }}"
+        state: "present"
+        firewall_policy:
+          name: "inside-to-outside"
+          srcintf: "insite"
+          dstintf: "vpn_branche"
+          action: "accept"
+          srcaddr: "all"
+          dstaddr: "all"
+          schedule: "always"
+          service: "ALL"
+          nat: "enable"
+          logtraffic: "all"
+          uuid: "d3255cdc-925e-51ef-7ef5-b4587b711aad"
+      access_token: "{{ fortigate_token }}"

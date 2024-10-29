@@ -1,0 +1,78 @@
+---
+- name: Configure SD-WAN on FortiGate
+  hosts: fortigates
+  connection: httpapi
+  gather_facts: no
+  collections:
+    - fortinet.fortios
+
+  vars:
+    ansible_httpapi_use_ssl: no
+    ansible_httpapi_validate_certs: no
+    ansible_httpapi_port: 80
+    vdom: "root"
+    fortigate_token: "6f9bb755jrjhjnywr8mqf9Nj0ghsn7"
+
+  tasks:
+    - name: Enable SD-WAN
+      fortios_system_sdwan:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_sdwan:
+          status: "enable"
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure SD-WAN zones
+      fortios_system_sdwan_zone:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_sdwan_zone:
+          name: "{{ item }}"
+      loop:
+        - "virtual-wan-link"
+        - "SASE"
+        - "sd_wan_isp"
+        - "VPN_ISP"
+      access_token: "{{ fortigate_token }}"
+
+    - name: Configure SD-WAN members
+      fortios_system_sdwan_member:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_sdwan_member:
+          id: "{{ item.id }}"
+          interface: "{{ item.interface }}"
+          zone: "{{ item.zone }}"
+          gateway: "{{ item.gateway | default(omit) }}"
+      loop:
+        - { id: 1, interface: "port2", zone: "sd_wan_isp", gateway: "10.63.244.1" }
+        - { id: 2, interface: "port3", zone: "sd_wan_isp", gateway: "10.63.255.1" }
+        - { id: 3, interface: "vpn_branch", zone: "VPN_ISP" }
+        - { id: 4, interface: "vpn_mfn", zone: "VPN_ISP" }
+      access_token: "{{ fortigate_token }}"
+
+    - name: Configure SD-WAN health checks
+      fortios_system_sdwan_health_check:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_sdwan_health_check:
+          name: "{{ item.name }}"
+          interval: 1000
+          probe_timeout: 1000
+          recoverytime: 10
+          system_dns: "{{ item.system_dns | default(omit) }}"
+          server: "{{ item.server | default(omit) }}"
+          protocol: "{{ item.protocol | default('ping') }}"
+          sla:
+            - id: 1
+              latency_threshold: 250
+              jitter_threshold: 50
+              packetloss_threshold: "{{ item.packetloss_threshold }}"
+      loop:
+        - { name: "Default_DNS", system_dns: "enable", packetloss_threshold: 5 }
+        - { name: "Default_Office_365", server: "www.office.com", protocol: "http", packetloss_threshold: 5 }
+        - { name: "Default_Gmail", server: "gmail.com", packetloss_threshold: 2 }
+        - { name: "Default_AWS", server: "aws.amazon.com", protocol: "http", packetloss_threshold: 5 }
+        - { name: "Default_Google Search", server: "www.google.com", protocol: "http", packetloss_threshold: 5 }
+        - { name: "Default_FortiGuard", server: "fortiguard.com", protocol: "http", packetloss_threshold: 5 }
+      access_token: "{{ fortigate_token }}"

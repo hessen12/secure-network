@@ -1,0 +1,133 @@
+---
+- name: Configure FortiGate interfaces
+  hosts: fortigates
+  connection: httpapi
+  gather_facts: no
+  collections:
+    - fortinet.fortios
+
+  vars:
+    ansible_httpapi_use_ssl: no
+    ansible_httpapi_validate_certs: no
+    ansible_httpapi_port: 80
+    vdom: "root"
+    fortigate_token: "6f9bb755jrjhjnywr8mqf9Nj0ghsn7"
+
+  tasks:
+    - name: Configure port2 interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "port2"
+          type: "physical"
+          snmp_index: 2
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure port3 interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "port3"
+          type: "physical"
+          snmp_index: 3
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure port4 interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "port4"
+          ip: "10.195.199.129 255.255.255.248"
+          allowaccess: "ping"
+          type: "physical"
+          alias: "outside"
+          lldp_reception: "enable"
+          role: "wan"
+          snmp_index: 4
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure port5 interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "port5"
+          type: "physical"
+          snmp_index: 5
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure port6 interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "port6"
+          type: "physical"
+          snmp_index: 6
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure naf.root tunnel interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "naf.root"
+          type: "tunnel"
+          src_check: "disable"
+          snmp_index: 7
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure l2t.root tunnel interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "l2t.root"
+          type: "tunnel"
+          snmp_index: 8
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure ssl.root interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "ssl.root"
+          type: "tunnel"
+          alias: "SSL VPN interface"
+          snmp_index: 9
+        access_token: "{{ fortigate_token }}"
+
+    - name: Configure fortilink aggregate interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "fortilink"
+          fortilink: "enable"
+          ip: "10.255.1.1 255.255.255.0"
+          allowaccess: ["ping", "fabric"]
+          type: "aggregate"
+          lldp_reception: "enable"
+          lldp_transmission: "enable"
+          snmp_index: 10
+        access_token: "{{ fortigate_token }}"
+
+  
+
+    - name: Configure vpn_branche tunnel interface
+      fortios_system_interface:
+        vdom: "{{ vdom }}"
+        state: "present"
+        system_interface:
+          name: "vpn_branche"
+          ip: "10.63.252.4 255.255.255.255"
+          allowaccess: "ping"
+          type: "tunnel"
+          remote_ip: "10.63.252.2 255.255.255.0"
+          snmp_index: 12
+          interface: "port4"
+        access_token: "{{ fortigate_token }}"

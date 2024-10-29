@@ -1,0 +1,29 @@
+---
+- name: Configure FortiGate HA settings
+  hosts: fortigates
+  connection: httpapi
+  gather_facts: no
+  collections:
+    - fortinet.fortios
+
+  vars:
+    ansible_httpapi_use_ssl: no
+    ansible_httpapi_validate_certs: no
+    ansible_httpapi_port: 80
+    vdom: "root"
+    fortigate_token: "6f9bb755jrjhjnywr8mqf9Nj0ghsn7"
+
+  tasks:
+    - name: Configure HA settings
+      fortios_system_ha:
+        access_token: "{{ fortigate_token }}"
+        vdom: "{{ vdom }}"
+        system_ha:
+          group_name: "hQ_centre"
+          mode: "a-a"
+          password: "123456"  # Use actual password
+          hbdev: ["port2", 0, "port3", 0]
+          override: "disable"
+          priority: 130
+          
+
